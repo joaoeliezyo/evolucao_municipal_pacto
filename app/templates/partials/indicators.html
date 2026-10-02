@@ -1,0 +1,12 @@
+{% from 'macros.html' import evolution, medal %}
+<div class="indicators">
+<section><h2>Municípios exibidos</h2><strong class="metric">{{ rows | length }}</strong></section>
+<section><h2>Melhor posição atual</h2><p class="municipal-name"><a href="/municipios/{{ kpis.melhor_posicao.municipio_id }}">{{ kpis.melhor_posicao.nome }}</a>{{ medal(kpis.melhor_posicao.ranking_evolucao) }}</p><strong class="metric">{{ kpis.melhor_posicao.posicao }}º</strong><p class="hint">Melhor colocação entre os municípios exibidos.</p></section>
+<section><h2>Evolução mediana</h2><strong class="metric">{{ evolution(kpis.mediana) }}</strong><p class="hint">Posições em relação ao mês anterior. {{ kpis.comparaveis }} municípios com comparação; {{ kpis.sem_comparacao }} sem comparação.</p></section>
+{% for key, title in [('melhoraram', 'Municípios que melhoraram'), ('pioraram', 'Municípios que pioraram'), ('estaveis', 'Municípios estáveis')] %}
+<section><h2>{{ title }}</h2>{% if kpis.comparaveis %}<strong class="metric {{ 'up' if key == 'melhoraram' else 'down' if key == 'pioraram' else 'neutral' }}">{{ kpis.contagens[key] }} de {{ kpis.comparaveis }}</strong><p>{{ ('%.1f' | format(kpis.percentuais[key])).replace('.', ',') }}% dos municípios com comparação</p>{% else %}<p>Sem dados para comparação.</p>{% endif %}<p class="hint">Sem comparação mensal: {{ kpis.sem_comparacao }}.</p></section>
+{% endfor %}
+<section><h2>Maior evolução positiva</h2>{% if subida %}<p class="municipal-name">{{ subida.nome }}{{ medal(subida.ranking_evolucao) }}</p><strong class="metric">{{ evolution(subida.evolucao) }}</strong>{% else %}<p>Nenhuma subida no período.</p>{% endif %}</section>
+<section><h2>Maior queda</h2>{% if queda %}<p>{{ queda.nome }}</p><strong class="metric">{{ evolution(queda.evolucao) }}</strong>{% else %}<p>Nenhuma queda no período.</p>{% endif %}</section>
+<section><h2>Evolução acumulada no ano</h2><strong class="metric">{{ evolution(kpis.acumulada) }}</strong><p class="hint">Mediana da diferença entre a primeira posição disponível de cada município no ano e a posição do mês selecionado. {{ kpis.acumulada_comparaveis }} com ao menos dois registros; {{ kpis.acumulada_sem_comparacao }} sem comparação.</p></section>
+</div>

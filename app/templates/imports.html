@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Importação{% endblock %}
+{% block page_heading %}Importação de posições municipais{% endblock %}
+{% block page_subtitle %}Atualize o ranking com a planilha Excel do período.{% endblock %}
+{% block content %}
+
+{% if error %}<p class="message error" role="alert">{{ error }}</p>{% endif %}
+{% if success %}<p class="message success" role="status">{{ success }}</p>{% endif %}
+<section><h2>Importar Excel</h2>
+{% if preview %}
+<form action="/imports/confirm" method="post">
+<input type="hidden" name="token" value="{{ preview.token }}">
+<div class="preview"><h3>Resumo da validação</h3><p>{{ preview.arquivo }}: {{ preview.quantidade }} registros para {{ ano }}.</p><p>Meses: {% for m in preview.meses %}{{ meses[m-1] }}{% if not loop.last %}, {% endif %}{% endfor %}.</p>
+<p>O arquivo validado está pronto para importação. Confirme em até 30 minutos.</p>
+{% if preview.existentes %}<p>Já existem dados em: {% for m in preview.existentes %}{{ meses[m-1] }}{% if not loop.last %}, {% endif %}{% endfor %}.</p><label class="check"><input type="checkbox" name="substituir" value="true" required>Confirmo a substituição das competências presentes no arquivo.</label>{% endif %}
+<button type="submit">Confirmar importação</button> <a href="/imports">Escolher outro arquivo</a></div>
+{% else %}
+<form action="/imports" method="post" enctype="multipart/form-data">
+<label>Planilha Excel<input name="arquivo" type="file" accept=".xlsx" required></label>
+<p class="hint">Até 10 MB. Aba Planilha1 com as colunas MUNICIPIO, POSIÇÃO e MÊS.</p>
+<div class="fields"><label>Ano de referência<input name="ano" type="number" min="1900" max="2100" value="{{ ano }}" placeholder="2026" required></label>
+<label>Mês de referência<select name="mes"><option value="0">Todos os meses do arquivo</option>{% for nome in meses %}<option value="{{ loop.index }}" {% if mes == loop.index %}selected{% endif %}>{{ nome }}</option>{% endfor %}</select></label></div>
+<button type="submit">Validar e revisar</button>
+{% endif %}
+</form></section>
+<section><h2>Competências armazenadas</h2>
+{% if periodos %}<div class="table-wrap"><table><thead><tr><th>Período</th><th>Registros</th><th>Arquivo</th><th>Importação (UTC)</th></tr></thead><tbody>{% for periodo, count in periodos %}<tr><td>{{ meses[periodo.mes-1] }}/{{ periodo.ano }}</td><td>{{ count }}</td><td>{{ periodo.arquivo_nome }}</td><td>{{ periodo.importado_em.strftime('%d/%m/%Y %H:%M') }}</td></tr>{% endfor %}</tbody></table></div>
+{% else %}<p>Nenhuma competência importada ainda.</p>{% endif %}
+</section>
+
+{% endblock %}

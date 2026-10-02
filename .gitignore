@@ -1,0 +1,42 @@
+.venv/
+__pycache__/
+.pytest_cache/
+# Dados locais: recriados pela aplicação ou transferidos separadamente
+/data/
+
+# Testes, documentação e planilha de exemplo
+/tests/
+/README.md
+/01_PRD.md
+/02_ARQUITETURA.md
+/03_MODELO_DADOS.sql
+/04_CONTRATO_EXCEL.md
+/06_CHECKLIST_TESTES.md
+/07_UI_SPEC.md
+/08_ESTADO_PROJETO.md
+/COLOCAÇÃO PACTO.xlsx
+
+# Instruções, configurações e históricos de ferramentas de IA
+.agents/
+.codex/
+.aws/
+.claude/
+.cursor/
+.aider*
+.windsurf/
+.continue/
+.roo/
+.clinerules/
+.cline/
+.github/copilot-instructions.md
+.github/instructions/
+.github/prompts/
+AGENTS.md
+AGENTS.override.md
+CLAUDE.md
+GEMINI.md
+.cursorrules
+.cursorignore
+.windsurfrules
+.clinerules
+05_PROMPT_CODEX.md

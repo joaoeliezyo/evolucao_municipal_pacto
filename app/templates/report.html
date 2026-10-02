@@ -1,0 +1,25 @@
+{% from 'macros.html' import evolution, medal %}
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório Pacto · {{ period_label }}</title><style>{{ report_fonts }}
+{{ report_css }}</style></head><body>
+{% for page_number, page_title in [(1, 'Indicadores do período'), (2, 'Posições e histórico no ano'), (3, 'Evolução dos municípios')] %}
+<article class="report-page">
+<header class="report-header"><img class="report-brand" src="/static/brand/brasao-pi.png" alt="Governo do Piauí" width="52" height="58"><div><p>JUCEPI · PACTO PELO PIAUÍ</p><h1>Evolução dos municípios no ranking de agilidade</h1></div><div class="report-heading-period"><strong>{{ period_label }}</strong><span>{{ page_title }}</span></div></header>
+<div class="report-body">
+{% if page_number == 1 %}
+{% include 'partials/indicators.html' %}
+{% elif page_number == 2 %}
+<div class="report-overview">{% include 'partials/positions.html' %}<section><h2>Histórico no ano</h2><p class="hint">Histórico até {{ period_label }}. Quanto menor a posição, melhor.</p><div class="report-history">{{ history_svg }}</div></section></div>
+{% else %}
+<div class="report-municipalities" style="grid-template-columns:repeat({{ card_columns }},minmax(0,1fr));grid-template-rows:repeat({{ card_rows }},minmax(0,1fr))">
+{% for row in rows %}
+<section class="report-municipal-card">
+<div class="municipal-card-heading"><span class="municipal-badge">{{ row.ranking_evolucao if row.ranking_evolucao is not none else '—' }}</span><h2>{{ row.nome }} {{ medal(row.ranking_evolucao) }}</h2></div>
+<div class="report-mini">{{ mini_svgs[loop.index0] }}</div>
+<div class="report-summary"><div><span>Anterior ({{ meses[(mes-2) % 12][:3] }})</span><strong>{{ (row.anterior | string) ~ 'º' if row.anterior is not none else '—' }}</strong></div><b aria-hidden="true">→</b><div><span>Atual ({{ meses[mes-1][:3] }})</span><strong>{{ row.posicao }}º</strong></div><div class="report-evolution"><span>Evolução</span>{{ evolution(row.evolucao) }}</div></div>
+</section>
+{% endfor %}</div>
+{% endif %}
+</div>
+<footer class="report-footer"><span>{{ period_label }} · {{ filter_label }}</span><span>Gerado em {{ generated_at }} (Fortaleza) · {{ page_number }}/3</span></footer>
+</article>
+{% endfor %}</body></html>

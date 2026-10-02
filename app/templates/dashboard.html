@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import evolution, history_chart, medal %}
+{% block page_heading %}Ranking de agilidade dos municípios{% if ano %} {{ ano }}{% endif %}{% endblock %}
+{% block page_subtitle %}Dashboard de evolução municipal · {% if mes %}{{ meses[mes-1] }} / {{ ano }}{% else %}Pacto pelo Piauí{% endif %}{% endblock %}
+{% block content %}
+
+<section class="dashboard-filters"><h2>Período e município</h2><form action="/dashboard" method="get" class="filters">
+<label>Ano<select name="ano" id="year-filter" {% if not anos %}disabled{% endif %}>{% for year in anos %}<option value="{{ year }}" {% if ano == year %}selected{% endif %}>{{ year }}</option>{% endfor %}</select></label>
+<label>Mês<select name="mes"><option value="0">Último disponível</option>{% for m in range(1,13) %}<option value="{{ m }}" {% if mes == m %}selected{% endif %}>{{ meses[m-1] }}</option>{% endfor %}</select></label>
+<label>Município<select name="municipio_id"><option value="0">Todos os municípios</option>{% for municipality in municipios %}<option value="{{ municipality.id }}" {% if municipio_id == municipality.id %}selected{% endif %}>{{ municipality.nome_exibicao }}</option>{% endfor %}</select></label><a class="button-link" href="/dashboard">Limpar filtros</a><noscript><button type="submit" {% if not anos %}disabled{% endif %}>Aplicar filtros</button></noscript></form>
+
+</section>
+{% if rows %}
+{% include 'partials/indicators.html' %}
+<div class="dashboard-overview">
+{% include 'partials/positions.html' %}
+<section><h2>Histórico no ano</h2><p class="hint">Quanto menor a posição, melhor. A posição 1 aparece no topo do gráfico.</p>{{ history_chart(charts) }}</section>
+</div>
+<p class="hint">Gráficos interativos até {{ meses[mes-1] }} de {{ ano }}. Passe o mouse ou toque no gráfico para consultar cada mês.</p>
+<div class="municipal-cards">
+{% for row in rows %}
+{% set series = charts[loop.index0] %}
+{% set direction = 'positive' if row.evolucao is not none and row.evolucao > 0 else 'negative' if row.evolucao is not none and row.evolucao < 0 else 'stable' %}
+<section class="municipal-card {{ direction }}">
+<div class="municipal-card-heading"><span class="municipal-badge" title="Posição no ranking de evolução do período">{{ row.ranking_evolucao if row.ranking_evolucao is not none else '—' }}</span><h2 class="municipal-name"><a href="/municipios/{{ row.municipio_id }}">{{ row.nome }}</a>{{ medal(row.ranking_evolucao) }}</h2></div>
+<div class="mini-chart-scroll"><div class="mini-chart" style="min-width: {{ [280, series['values'] | length * 30] | max }}px"><canvas data-series="{{ loop.index0 }}" role="img" aria-label="Histórico de {{ row.nome }}. Quanto menor a posição, melhor.">Histórico mensal abaixo.</canvas></div></div>
+<div class="municipal-summary">
+<div class="previous-position"><span class="summary-label">Posição anterior ({{ meses[(mes-2) % 12][:3] }})</span><strong>{{ (row.anterior | string) ~ 'º' if row.anterior is not none else '—' }}</strong></div>
+<span class="position-arrow" aria-hidden="true">→</span>
+<div class="current-position"><span class="summary-label">Posição atual ({{ meses[mes-1][:3] }})</span><strong>{{ row.posicao }}º</strong></div>
+<div class="evolution-box"><span class="summary-label">Evolução</span>{% if row.evolucao is not none %}<strong>{{ '+' if row.evolucao > 0 else '' }}{{ row.evolucao }}</strong><span class="summary-unit">posições</span>{% else %}<span class="no-comparison">Sem comparação</span>{% endif %}</div>
+</div>
+</section>
+{% endfor %}</div>
+{% else %}<section><h2>Nenhuma posição encontrada</h2><p>Não há dados para os filtros selecionados.</p><a href="/imports">Importar uma planilha</a></section>{% endif %}
+{% if rows %}
+<details class="export-control"><summary aria-label="Exportar" title="Exportar"><img class="export-icon" src="/assets/export.svg" alt="" aria-hidden="true"></summary><div class="export-menu"><button type="button" data-export-format="png">PNG</button><button type="button" data-export-format="pdf">PDF</button></div></details>
+<p id="export-status" class="export-status" role="status" aria-live="polite" hidden></p>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="/static/filters.js" defer></script><script src="/static/exports.js" defer></script><script src="/static/vendor/chart.umd.min.js" defer></script><script src="/static/dashboard.js" defer></script>{% endblock %}

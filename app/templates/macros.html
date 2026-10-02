@@ -1,0 +1,15 @@
+{% macro evolution(value) -%}
+{% if value is none %}<span class="hint">Sem comparação</span>{% elif value > 0 %}<span class="up">↑ +{{ ('%g' | format(value)).replace('.', ',') }}</span>{% elif value < 0 %}<span class="down">↓ {{ ('%g' | format(value)).replace('.', ',') }}</span>{% else %}<span class="neutral">→ 0</span>{% endif %}
+{%- endmacro %}
+{% macro history_chart(charts) -%}
+<div class="chart-wrap"><canvas id="history-chart" aria-label="Histórico das posições municipais" role="img">Consulte as posições nas tabelas e cards desta página.</canvas></div>
+<script type="application/json" id="chart-data">{{ charts | tojson }}</script>
+<p id="chart-message" class="hint" hidden>O gráfico não pôde ser carregado. As posições continuam disponíveis nas tabelas e cards.</p>
+{%- endmacro %}
+
+{% macro medal(rank) -%}
+{% if rank in [1, 2, 3] %}
+{% set name = ['ouro', 'prata', 'bronze'][rank - 1] %}
+<img class="municipal-medal" src="/assets/{{ name }}.svg" alt="Medalha de {{ name }}: {{ rank }}º lugar no ranking de evolução" title="{{ rank }}º lugar no ranking de evolução" width="28" height="34">
+{% endif %}
+{%- endmacro %}
