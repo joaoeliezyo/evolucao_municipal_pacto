@@ -5,7 +5,8 @@ __pycache__/
 /data/
 
 # Testes, documentação e planilha de exemplo
-/tests/
+/tests/*
+!/tests/test_security.py
 /README.md
 /01_PRD.md
 /02_ARQUITETURA.md

@@ -13,12 +13,11 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from .database import Base, engine, SessionLocal
 from .models import ImportacaoPendente, Municipio, Periodo, Posicao
-from .services.import_service import MESES, parse_excel, conflicts, persist
+from .services.import_service import MAX_BYTES, MESES, parse_excel, conflicts, persist
 from .schemas import ImportResult
 from .services.ranking_service import dashboard, history
 
 ROOT = Path(__file__).resolve().parent
-MAX_BYTES = 10 * 1024 * 1024
 
 
 @asynccontextmanager
@@ -31,6 +30,17 @@ app = FastAPI(title='Dashboard Pacto pelo Piauí', lifespan=lifespan)
 app.mount('/static', StaticFiles(directory=ROOT / 'static'), name='static')
 app.mount('/assets', StaticFiles(directory=ROOT.parent / 'assets'), name='assets')
 templates = Jinja2Templates(directory=ROOT / 'templates')
+
+
+@app.middleware('http')
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['Referrer-Policy'] = 'same-origin'
+    if request.url.path.startswith(('/imports', '/api/imports')):
+        response.headers['Cache-Control'] = 'no-store'
+    return response
 
 
 def render(request, error=None, success=None, preview=None, ano='', mes=0, status=200):

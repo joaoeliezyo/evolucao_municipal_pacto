@@ -1,48 +1,51 @@
 # Dashboard Pacto pelo Piauí
 
-Este pacote foi atualizado a partir da planilha real de entrada `COLOCAÇÃO PACTO.xlsx`.
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat)
+![Uvicorn](https://img.shields.io/badge/Uvicorn-4051B5?style=flat)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=flat)
+![openpyxl](https://img.shields.io/badge/openpyxl-217346?style=flat)
+![defusedxml](https://img.shields.io/badge/defusedxml-3776AB?style=flat)
+![Jinja2](https://img.shields.io/badge/Jinja2-B41717?style=flat)
+![python-multipart](https://img.shields.io/badge/python--multipart-3776AB?style=flat)
+![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=flat)
+![pytest](https://img.shields.io/badge/pytest-0A9EDC?style=flat)
+![httpx](https://img.shields.io/badge/httpx-009688?style=flat)
+![pypdf](https://img.shields.io/badge/pypdf-3776AB?style=flat)
 
-## Formato real identificado
+Aplicação web para acompanhar a evolução mensal das posições de 12 municípios no Pacto pelo Piauí. Centraliza a importação de planilhas Excel, o histórico municipal e a análise dos resultados em um dashboard com filtros, indicadores e relatórios exportáveis.
 
-A planilha possui uma única aba (`Planilha1`) com 109 linhas e 3 colunas:
+Desenvolvida em Python com FastAPI, SQLAlchemy e SQLite, com interface em português e identidade visual baseada no Ranking Municipal da JUCEPI.
 
-- `MUNICIPIO`
-- `POSIÇÃO`
-- `MÊS`
+## Funcionalidades
 
-Há 12 municípios por mês, de JANEIRO a SETEMBRO, totalizando 108 registros de dados.
+- **Importação com revisão:** validação de arquivos Excel antes da gravação e confirmação explícita para substituir períodos existentes.
+- **Dashboard interativo:** filtros por ano, mês e município, indicadores de desempenho e ranking de evolução mensal.
+- **Histórico municipal:** gráficos e tabelas com as posições armazenadas, inclusive entre anos diferentes.
+- **Ranking de evolução:** classificação com critérios de desempate e medalhas para os três primeiros municípios com comparação válida.
+- **Exportação de relatórios:** PDF com texto pesquisável e gráficos vetoriais ou ZIP com imagens PNG.
+- **Interface responsiva:** adaptação a dispositivos móveis, com fontes, imagens e Chart.js servidos localmente.
+- **API documentada:** validação e importação de planilhas via HTTP, com documentação interativa em `/docs`.
 
-## Regra de importação
+## Tecnologias
 
-O sistema deve receber:
-1. arquivo Excel;
-2. ano de referência informado pelo usuário.
+| Camada | Tecnologias |
+| --- | --- |
+| Aplicação e servidor | Python 3.12+, FastAPI e Uvicorn |
+| Persistência | SQLAlchemy e SQLite |
+| Leitura de planilhas | openpyxl e defusedxml |
+| Interface | Jinja2, CSS, JavaScript e Chart.js |
+| Exportação | Playwright e Chrome/Chromium |
+| Testes | pytest, httpx e pypdf |
 
-O mês pode ser obtido da coluna `MÊS`. Para segurança, a interface pode permitir informar o mês e validar que ele coincide com os valores encontrados no arquivo.
+## Instalação e execução
 
-A posição anterior e a evolução NÃO devem ser importadas: devem ser calculadas pelo sistema.
+### Pré-requisitos
 
-## Stack sugerida
+- Python 3.12 ou superior, com `pip` e suporte a `venv`.
+- Chrome/Chromium disponível para gerar relatórios e executar os testes de exportação.
 
-- Python 3.12+
-- FastAPI
-- SQLAlchemy
-- SQLite
-- pandas + openpyxl
-- Jinja2
-- Chart.js
-- pytest
-
-Consulte o PRD, a arquitetura, o contrato de entrada e a especificação visual neste repositório.
-
-## Aplicação de importação
-
-A aplicação implementada usa FastAPI, Jinja2, openpyxl e SQLAlchemy com SQLite.
-O openpyxl lê diretamente o contrato simples de três colunas, sem necessidade de pandas.
-
-### Executar
-
-Requer Python 3.12+ com suporte a `venv` e pip.
+Execute os comandos a partir da raiz do repositório:
 
 ```bash
 python3 -m venv .venv
@@ -51,178 +54,190 @@ python -m pip install -r requirements.txt
 python -m uvicorn app.main:app --reload
 ```
 
-Acesse http://127.0.0.1:8000/ para o dashboard ou http://127.0.0.1:8000/imports para importar. O banco `data/app.db` e suas tabelas
-são criados automaticamente ao iniciar. Para outro banco SQLite, configure
-`DATABASE_URL`, por exemplo `sqlite:////tmp/pacto.db`.
+No Windows, ative o ambiente virtual com `.venv\Scripts\Activate.ps1` no PowerShell.
 
-### Importar
+| Acesso local | Endereço |
+| --- | --- |
+| Dashboard | http://127.0.0.1:8000/dashboard |
+| Importação de planilhas | http://127.0.0.1:8000/imports |
+| Documentação da API | http://127.0.0.1:8000/docs |
 
-1. Selecione um `.xlsx` de até 10 MB e informe o ano (1900 a 2100).
-2. Selecione o mês correspondente ou “Todos os meses do arquivo”. O mês específico
-   exige que todas as linhas pertençam àquela competência; não filtra silenciosamente.
-3. Clique em “Validar e revisar” para ver os registros e meses encontrados.
-4. Clique em “Confirmar importação”, sem selecionar o arquivo novamente. Caso existam competências,
-   marque a confirmação explícita de substituição. Após a gravação, o navegador abre
-   o dashboard no ano informado e no último mês contido no arquivo. Atualizar essa
-   página não reenvia a importação.
+O banco `data/app.db` e as tabelas são criados automaticamente na inicialização. Em uma instalação nova, importe uma planilha para preencher o dashboard. A opção `--reload` é destinada ao desenvolvimento local.
 
-Os municípios aceitos são os 12 definidos no PRD. Nomes são comparados ignorando
-espaços extras e diferenças de caixa; o nome original é preservado no cadastro.
-Meses e cabeçalhos devem seguir o contrato documentado. Linhas totalmente vazias são
-ignoradas; posições inválidas e municípios duplicados no mês impedem a importação.
-Arquivos com meses incompletos são aceitos; a quantidade é mostrada na revisão.
+### Navegador para exportação
 
-O arquivo validado é mantido temporariamente no banco por 30 minutos. A confirmação
-usa esse mesmo arquivo e os parâmetros revisados, valida novamente e grava em uma
-única transação. A revisão só pode ser confirmada uma vez; se a gravação falhar,
-ela continua disponível para tentar novamente dentro do prazo. Revisões expiradas
-são removidas na próxima validação de arquivo.
-A substituição remove posições apenas das competências contidas no novo arquivo,
-preservando os demais meses. O horário de importação é exibido em UTC.
+A aplicação detecta executáveis `google-chrome`, `chromium` ou `chromium-browser` disponíveis no sistema. Se necessário, instale o Chromium do Playwright:
 
-### API de importação
+```bash
+python -m playwright install chromium
+```
 
-`POST /api/imports` recebe `multipart/form-data` e retorna JSON:
+Também é possível indicar um executável existente com `EXPORT_BROWSER_PATH`. O ambiente de execução precisa permitir que o servidor inicie o navegador.
 
-| Campo | Descrição |
-|---|---|
-| `arquivo` | Planilha `.xlsx`, obrigatória |
-| `ano` | Ano de referência, obrigatório |
-| `mes` | 1 a 12; 0 (padrão) importa todos os meses |
-| `confirmar` | `false` (padrão) valida sem gravar; `true` grava |
-| `substituir` | `true` autoriza substituir as competências já existentes |
+### Configuração
 
-Exemplo de gravação:
+| Variável de ambiente | Finalidade | Padrão |
+| --- | --- | --- |
+| `DATABASE_URL` | Caminho de conexão com outro banco SQLite | `data/app.db` na raiz do projeto |
+| `EXPORT_BROWSER_PATH` | Caminho do executável Chrome/Chromium | Detecção automática; na ausência, Chromium do Playwright |
+
+Exemplo com um banco alternativo:
+
+```bash
+export DATABASE_URL='sqlite:////tmp/pacto.db'
+python -m uvicorn app.main:app --reload
+```
+
+## Importação de dados
+
+1. Acesse `/imports` e selecione um arquivo `.xlsx` de até **10 MB**, com até **1000 linhas** (incluindo o cabeçalho).
+2. Informe o ano de referência, entre **1900 e 2100**.
+3. Selecione um mês ou **Todos os meses do arquivo**.
+4. Clique em **Validar e revisar** e confira os registros, meses e períodos existentes.
+5. Clique em **Confirmar importação**. Caso haja dados nos períodos apresentados, confirme a substituição.
+
+Após a confirmação, o dashboard abre no ano informado e no último mês do arquivo. A revisão permanece disponível por **30 minutos** e só pode ser confirmada uma vez. A gravação ocorre em uma única transação; em caso de falha, a revisão permanece disponível para nova tentativa dentro do prazo.
+
+A substituição troca todos os registros dos períodos presentes no arquivo e preserva os demais meses. Assim, um arquivo com um mês incompleto substitui também os dados anteriores daquele mês.
+
+### Formato da planilha
+
+A aba deve se chamar **`Planilha1`**, com estas três colunas, nesta ordem:
+
+| MUNICIPIO | POSIÇÃO | MÊS |
+| --- | ---: | --- |
+| BETANIA | 217 | JANEIRO |
+| BURITI DOS MONTES | 100 | JANEIRO |
+| CAMPO LARGO | 180 | JANEIRO |
+
+- `MUNICIPIO`: um dos 12 municípios cadastrados em `app/services/import_service.py`, conforme o PRD.
+- `POSIÇÃO`: número inteiro positivo.
+- `MÊS`: nome do mês em português, de `JANEIRO` a `DEZEMBRO`.
+
+O conteúdo descompactado é limitado a **50 MB** e o arquivo pode conter até **256 entradas ZIP**. Planilhas criptografadas são rejeitadas.
+
+O ano é informado na importação e não faz parte da planilha. Cabeçalhos, municípios e meses são comparados ignorando espaços extras e diferenças entre maiúsculas e minúsculas; a grafia e os acentos do contrato devem ser respeitados. O nome original do município é preservado no cadastro.
+
+Linhas totalmente vazias são ignoradas. Municípios desconhecidos, posições inválidas e registros duplicados para o mesmo município no mesmo mês impedem a importação. Meses incompletos são aceitos, com a quantidade de registros exibida na revisão. A seleção de um mês específico exige que **todas as linhas** pertençam àquele mês.
+
+O arquivo de referência `COLOCAÇÃO PACTO.xlsx` contém **108 registros**, distribuídos entre janeiro e setembro, com 12 municípios por mês. Consulte o [contrato de entrada](04_CONTRATO_EXCEL.md) para mais detalhes.
+
+## Dashboard e regras de cálculo
+
+O dashboard seleciona inicialmente o período mais recente armazenado. Os filtros são aplicados automaticamente; **Limpar filtros** retorna ao período mais recente com todos os municípios, e **Último disponível** seleciona o último mês do ano informado. Um período sem dados apresenta um estado vazio.
+
+### Evolução mensal
+
+```text
+evolução = posição anterior − posição atual
+```
+
+Por exemplo, passar da posição 100 para a 80 representa uma evolução de **+20 posições**. Valores positivos indicam melhora, negativos indicam queda e zero indica estabilidade.
+
+A comparação exige um registro do mesmo município no mês imediatamente anterior, inclusive na passagem de dezembro para janeiro. O primeiro registro e os meses após uma lacuna exibem **Sem comparação**. Posição anterior e evolução são calculadas pelo sistema.
+
+### Classificação e indicadores
+
+A tabela ordena os municípios pela maior evolução, com desempate pela melhor posição atual e, depois, pelo nome. Registros sem comparação ficam ao final. As medalhas consideram todos os municípios do período e mantêm essa classificação quando um município é filtrado.
+
+Os indicadores acompanham os municípios exibidos pelos filtros:
+
+- Melhora, queda, estabilidade e evolução mediana consideram apenas comparações mensais válidas; os registros sem comparação são informados separadamente.
+- A melhor posição atual corresponde ao menor número, com desempate pelo nome.
+- A evolução acumulada no ano corresponde à primeira posição disponível no ano menos a posição do período selecionado. Exige ao menos dois registros no ano e é resumida pela mediana do grupo exibido.
+
+Os gráficos do dashboard mostram o histórico de janeiro até o mês selecionado. Meses ausentes não são conectados, e a posição 1 aparece no topo do eixo. Ao clicar no nome de um município, é possível consultar todo o seu histórico em `/municipios/{municipio_id}`.
+
+## Exportação de relatórios
+
+Use o menu de exportação no canto inferior direito do dashboard para gerar um relatório com os filtros atuais. Cada relatório contém **três páginas no formato 16:10**:
+
+1. Indicadores de desempenho.
+2. Tabela de posições e histórico no ano.
+3. Gráficos individuais na ordem do ranking de evolução.
+
+| Formato | Arquivo gerado |
+| --- | --- |
+| PNG | ZIP com três imagens de 1600 × 1000 pixels |
+| PDF | Documento de três páginas, com textos selecionáveis e gráficos SVG vetoriais |
+
+Os relatórios incluem período, filtro, data e hora de Fortaleza e numeração das páginas. A geração usa recursos locais, arquivos temporários e admite até duas exportações simultâneas. Períodos sem registros não podem ser exportados.
+
+## API
+
+### Importar planilha
+
+`POST /api/imports` recebe `multipart/form-data`:
+
+| Campo | Tipo | Comportamento |
+| --- | --- | --- |
+| `arquivo` | Arquivo `.xlsx` | Obrigatório |
+| `ano` | Inteiro | Obrigatório; entre 1900 e 2100 |
+| `mes` | Inteiro | `0` para todos os meses (padrão) ou `1` a `12` |
+| `confirmar` | Booleano | `false` apenas valida (padrão); `true` grava |
+| `substituir` | Booleano | `true` autoriza substituir períodos existentes; padrão `false` |
+
+Exemplo de validação, sem gravar dados:
 
 ```bash
 curl http://127.0.0.1:8000/api/imports \
   -F 'arquivo=@COLOCAÇÃO PACTO.xlsx' \
-  -F ano=2026 -F mes=0 -F confirmar=true
+  -F ano=2026 \
+  -F mes=0
 ```
 
-A resposta informa `status`, `arquivo`, `ano`, `quantidade`, `meses` e
-`competencias_existentes`. Erros de validação retornam 400, conflitos 409,
-arquivos acima do limite 413 e parâmetros ausentes ou de tipo inválido 422.
-Consulte e experimente o endpoint em http://127.0.0.1:8000/docs.
+Informe o ano real dos dados. Para gravar, acrescente `-F confirmar=true`; para autorizar a substituição de períodos existentes, acrescente também `-F substituir=true`.
 
-### Arquivos da aplicação
+A resposta JSON contém `status`, `arquivo`, `ano`, `quantidade`, `meses` e `competencias_existentes`. A API retorna **400** para erros de validação, **409** para conflitos, **413** para arquivos acima do limite e **422** para parâmetros obrigatórios ausentes ou tipos inválidos.
 
-- `app/main.py`: inicialização e rotas do dashboard, histórico e importação.
-- `app/services/ranking_service.py`: consultas de posições, evolução e histórico.
-- `app/database.py`: conexão, sessões e ativação de chaves estrangeiras SQLite.
-- `app/models.py`: municípios, períodos e posições com restrições de integridade.
-- `app/services/import_service.py`: leitura, validação e persistência transacional.
-- `app/templates/` e `app/static/`: interface responsiva em português.
-- `tests/`: validação de planilhas, persistência, substituição e rollback.
+### Exportar relatório
 
-Para executar os testes:
+`GET /api/exports/{png|pdf}` recebe os parâmetros opcionais `ano`, `mes` e `municipio_id`, com os mesmos filtros do dashboard. Consulte `/docs` para explorar os endpoints.
+
+## Estrutura do projeto
+
+```text
+app/
+├── main.py                  # Inicialização e rotas HTTP
+├── database.py              # Conexão e sessões SQLite
+├── models.py                # Modelos e restrições de integridade
+├── schemas.py               # Esquemas de resposta da API
+├── services/
+│   ├── import_service.py    # Leitura, validação e persistência
+│   ├── ranking_service.py   # Evolução, indicadores e histórico
+│   └── export_service.py    # Geração de relatórios PNG e PDF
+├── templates/               # Páginas e relatórios Jinja2
+└── static/                  # CSS, JavaScript, fontes e identidade visual
+assets/                      # Medalhas e ícones SVG
+data/                        # Banco SQLite local, não versionado
+tests/                       # Testes automatizados
+requirements.txt             # Dependências Python
+```
+
+## Testes
+
+Com o ambiente virtual ativo e as dependências instaladas:
 
 ```bash
 python -m pytest -q
 ```
 
-Os testes utilizam bancos temporários e conferem a planilha real, os 12 resultados
-de evolução de setembro, primeiro mês, filtros, lacunas no histórico, virada do ano
-e navegação HTTP.
+A suíte utiliza bancos temporários e cobre validação de planilhas, confirmação, substituição, rollback, evolução mensal, filtros, lacunas no histórico, passagem de ano, navegação HTTP e exportações. Os testes de exportação precisam iniciar Chrome/Chromium.
 
-### Dashboard e histórico
+## Documentação do projeto
 
-Após importar a planilha, abra `/` ou `/dashboard`. A seleção inicial usa o último
-ano e mês armazenados. Os filtros são aplicados automaticamente ao escolher ano,
-mês ou município. O botão “Limpar filtros” abre o período mais recente com todos
-os municípios. “Último
-disponível” escolhe o último mês do ano informado. Períodos sem dados mostram um
-estado vazio, sem substituir a seleção por outro mês.
+| Documento | Conteúdo |
+| --- | --- |
+| [Requisitos do produto](01_PRD.md) | Objetivos, municípios e critérios de aceite |
+| [Arquitetura](02_ARQUITETURA.md) | Organização técnica e fluxos implementados |
+| [Modelo de dados](03_MODELO_DADOS.sql) | Esquema SQL de referência |
+| [Contrato Excel](04_CONTRATO_EXCEL.md) | Estrutura e validações da planilha |
+| [Checklist de testes](06_CHECKLIST_TESTES.md) | Verificações e pendências de homologação |
+| [Especificação visual](07_UI_SPEC.md) | Decisões de interface e identidade visual |
+| [Estado do projeto](08_ESTADO_PROJETO.md) | Entrega atual e próximos passos |
 
-A tabela “Posições atuais” reúne a posição no ranking de evolução, o município,
-as posições anterior e atual e a evolução. Ela ordena os municípios da maior para a
-menor, com os registros sem comparação ao final. Em caso de empate, usa a melhor
-posição atual e depois o nome. Os cards e seus números seguem essa mesma classificação pela evolução.
-O ranking de evolução fica nessa mesma tabela. Os três primeiros recebem medalhas
-de ouro, prata e bronze após o nome, usando os SVGs da pasta `assets/`. As
-medalhas consideram todos os municípios do período e mantêm a classificação
-ao filtrar um município. Sem comparação mensal, não há medalha. O dashboard apresenta
-maior subida, maior queda, cards com histórico mensal e gráficos de linha.
-Os cards individuais usam linha azul (`#1e40af`) com pontos e posições anotadas, meses no
-eixo horizontal e resumo de posição anterior, atual e evolução. Históricos longos
-permitem rolagem dentro do gráfico em telas pequenas. Os
-indicadores consideram os municípios exibidos pelo filtro. Empates nos destaques
-são resolvidos pela ordenação do ranking; todos os valores permanecem visíveis.
-Clique no nome de um município para abrir `/municipios/{id}`, com gráfico e tabela
-de todo o histórico armazenado, incluindo anos diferentes.
+A publicação e a homologação no ambiente de destino permanecem pendentes. A aplicação cria tabelas ausentes na inicialização, mas não possui um sistema de migrações para atualizar tabelas existentes. O SQL de referência não deve ser usado como migração do banco de trabalho.
 
-A evolução é `posição anterior - posição atual`. A comparação exige dados do mês
-imediatamente anterior para aquele município, inclusive dezembro/janeiro. O
-primeiro período ou um mês após uma lacuna mostra “Sem comparação”. Meses ausentes
-não são conectados no gráfico. A posição 1 aparece no topo do eixo vertical.
+## Segurança
 
-Chart.js 4.4.8 é servido localmente em `app/static/vendor/`, com sua licença MIT.
-Os gráficos são interativos, gerados com as posições reais do banco; ao passar o
-mouse ou tocar no gráfico, o tooltip mostra mês e posição. O histórico no dashboard
-vai de janeiro até o mês selecionado, ou até a última competência disponível quando
-não há filtros. A mudança de filtro recalcula os gráficos. As tabelas e valores
-mensais permanecem disponíveis se o JavaScript não carregar.
-O layout adapta filtros e cards a telas pequenas; as tabelas permitem rolagem
-horizontal. O dashboard foi conferido no Chrome headless em larguras de 1440 e
-390 pixels, com os 13 gráficos carregados e sem transbordamento horizontal da página.
-A publicação e a homologação no ambiente de destino permanecem pendentes.
-
-### Indicadores adicionais
-
-Os indicadores acompanham os filtros. Quantidade e percentual de municípios que
-melhoraram, pioraram e ficaram estáveis usam apenas comparações mensais válidas;
-a quantidade sem comparação é informada. A evolução mediana usa essa mesma base.
-A melhor posição atual usa a menor posição, com desempate pelo nome.
-A evolução acumulada no ano é calculada por município (primeira posição disponível
-no ano menos posição selecionada) e resumida pela mediana do grupo exibido. Exige
-ao menos dois registros no ano; a quantidade excluída é mostrada no card.
-
-### Exportação em PNG e PDF
-
-O ícone de exportação usa o SVG original de `assets/export.svg`, sem recoloração,
-e fica no canto inferior direito do dashboard. O menu exibe apenas “PDF” e “PNG”,
-com largura ajustada ao conteúdo. Os filtros permanecem visíveis durante a rolagem;
-em telas pequenas os controles ficam compactos. Em celulares na horizontal com pouca altura,
-os filtros voltam ao fluxo da página para liberar a área de leitura.
-
-A exportação considera ano, mês e município exibidos e produz três páginas 16:10,
-cada uma com cabeçalho e rodapé com período, filtro, data/hora de Fortaleza e número:
-
-1. Indicadores (KPIs).
-2. Tabela de posições e histórico no ano.
-3. Todos os gráficos individuais, na ordem do ranking de evolução.
-
-“PNG” baixa um ZIP com três imagens de 1600 × 1000 pixels. “PDF” baixa um
-PDF de três páginas com textos selecionáveis e gráficos SVG vetoriais; títulos,
-nomes dos municípios, valores e rótulos dos gráficos são pesquisáveis. O relatório
-usa os dados até o mês selecionado e incorpora as medalhas, sem depender de rede.
-Os dados são consultados ao clicar em exportar, usando os filtros atuais.
-
-A geração usa Playwright com Chrome/Chromium. Neste ambiente o Chrome instalado é
-detectado automaticamente. Em outra máquina, após instalar `requirements.txt`,
-instale um navegador com `python -m playwright install chromium`, ou configure
-`EXPORT_BROWSER_PATH` com o caminho de um Chrome/Chromium existente. O servidor
-precisa poder iniciar esse navegador. A geração usa arquivos temporários e permite
-até duas exportações simultâneas; a interface apresenta mensagens de progresso e erro.
-
-A rota `GET /api/exports/{png|pdf}` aceita `ano`, `mes` e `municipio_id`, assim como
-o dashboard. Períodos sem registros não podem ser exportados.
-
-### Identidade visual
-
-A interface segue a identidade do [Ranking Municipal da JUCEPI](https://rankingmunicipal.jucepi.pi.gov.br/):
-cabeçalho azul institucional, fundo cinza claro, cards brancos com sombras discretas,
-KPIs sem ícones, tabela com cabeçalho azul e rodapé institucional. O tema é
-compartilhado pelo dashboard, importação, histórico individual e relatórios exportados.
-
-O rodapé reproduz os textos, links e ícones da referência, incluindo órgão,
-atendimento, redes sociais, sites e créditos. Fica na base da tela em páginas curtas
-e após o conteúdo em páginas longas.
-
-Os logotipos públicos do site estão em `app/static/brand/`. As fontes Inter e Space
-Grotesk estão em `app/static/fonts/`, com suas licenças SIL Open Font License. Fontes,
-logotipos, medalhas e biblioteca de gráficos são servidos localmente. O layout mantém
-1600 px de largura máxima, seis KPIs e três gráficos individuais por linha em desktop,
-com controles e colunas adaptados ao celular.
-
-O estado de entrega e os próximos passos estão em [08_ESTADO_PROJETO.md](08_ESTADO_PROJETO.md).
+A revisão de segurança, os problemas corrigidos e as pendências estão em [SECURITY.md](SECURITY.md). As rotas de importação ainda não possuem autenticação: quem consegue acessar a aplicação pode importar e substituir dados. Antes de publicá-la, restrinja essas rotas a operadores autorizados.
